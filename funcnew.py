@@ -65,6 +65,27 @@ def borrow_book(books, records, book_id, member_id):
 def view_borrowing_history(records):
     return records
 
+def return_book(books, records, book_id, member_id):
+    updated_books = []
+    updated_records = [record for record in records if not (record["Book ID"] == book_id and record["Member ID"] == member_id)]
+
+    book_found = False
+    for book in books:
+        if book["id"] == book_id:
+            book_found = True
+            updated_books.append({**book, "Quantity": book["Quantity"] + 1})
+        else:
+            updated_books.append(book)
+
+    if not book_found:
+        return ("Book ID not found.", records)
+    
+    if len(records) == len(updated_records):
+        return ("No matching borrowing record found for this member and book.", records)
+    
+    return updated_books, updated_records
+
+
 def register_member(members, name, email, borrowing_limit):
     new_id = max(member["id"] for member in members) + 1 if members else 101
     new_member = {"id": new_id, "name": name, "email": email, "borrowing_limit": borrowing_limit}
@@ -80,12 +101,13 @@ def handle_choice(choice, books, members, records):
         "2": lambda: remove_book(books, input("Enter book title to remove: ")),
         "3": lambda: update_book(books, int(input("Enter book ID to update: ")), **get_book_update_input()),
         "4": lambda: (search_book(books, input("Enter keyword to search: ")),),
-        "5": lambda: borrow_book(books, records, int(input("Enter book ID to borrow: ")), int(input("Enter member ID: ")) ),
+        "5": lambda: borrow_book(books, records, int(input("Enter book ID to borrow: ")), int(input("Enter member ID: "))),
         "6": lambda: (display_available_books(books),),
         "7": lambda: (view_borrowing_history(records),),
         "8": lambda: register_member(members, *get_input_for_new_member()),
         "9": lambda: view_member_details(members, int(input("Enter member ID to view details: "))),
-    }#higher order implemented
+        "10": lambda: return_book(books, records, int(input("Enter book ID to return: ")), int(input("Enter member ID: "))),
+    }
     
     return operations.get(choice, lambda: ("Invalid choice. Please try again.",))()
 
@@ -126,11 +148,12 @@ while True:
     print("7. View Borrowing History")
     print("8. Register Member")
     print("9. View Member Details")
-    print("10. Exit")
+    print("10. Return Book")
+    print("11. Exit")
 
     choice = input("Enter your choice: ")
     
-    if choice == "10":
+    if choice == "11":
         print("Exiting the system. Goodbye!")
         break
 
@@ -143,4 +166,4 @@ while True:
         else:
             print(result[0])  # Handle the single value result (like search or view)
     else:
-        print("Invalid choice. Please try again.")
+        print(result)
