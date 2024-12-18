@@ -82,8 +82,22 @@ def view_member_details(members, member_id):
             return member
     print("Member not found.")
     return None
+def return_book(books, records, book_id, member_id):
+    # Check if the member has borrowed the book
+    for record in records:
+        if record["Book ID"] == book_id and record["Member ID"] == member_id:
+            records.remove(record)  # Remove the borrowing record
+            for book in books:
+                if book["id"] == book_id:
+                    book["Quantity"] += 1  # Increment the book's quantity
+                    print(f"Book '{book['Title']}' returned successfully.")
+                    return books, records
+            break
+    else:
+        print("No borrowing record found for this book and member.")
+    return books, records
 
-# Sample interaction loop
+# Adding the return book option to the interaction loop
 while True:
     print("\nLibrary Management System")
     print("1. Add Book")
@@ -91,11 +105,12 @@ while True:
     print("3. Update Book")
     print("4. Search Books")
     print("5. Borrow Book")
-    print("6. Display Available Books")
-    print("7. View Borrowing History")
-    print("8. Register Member")
-    print("9. View Member Details")
-    print("10. Exit")
+    print("6. Return Book")  # New option
+    print("7. Display Available Books")
+    print("8. View Borrowing History")
+    print("9. Register Member")
+    print("10. View Member Details")
+    print("11. Exit")
 
     choice = input("Enter your choice: ")
 
@@ -136,32 +151,36 @@ while True:
         else:
             books_dataset_final, borrowing_records = borrow_book(books_dataset_final, borrowing_records, book_id, member_id)
 
+    elif choice == "6":  # Return book option
+        book_id = int(input("Enter book ID to return: "))
+        member_id = int(input("Enter member ID: "))
+        books_dataset_final, borrowing_records = return_book(books_dataset_final, borrowing_records, book_id, member_id)
 
-    elif choice == "6":
+    elif choice == "7":
         available_books = display_available_books(books_dataset_final)
         print(available_books)
 
-    elif choice == "7":
+    elif choice == "8":
         history = view_borrowing_history(borrowing_records)
         if not history:
             print("No borrowing history found.")
         else:
             print(history)
 
-    elif choice == "8":
+    elif choice == "9":
         name = input("Enter member name: ")
         email = input("Enter member email: ")
         borrowing_limit = int(input("Enter borrowing limit: "))
         members = register_member(members, name, email, borrowing_limit)
         print("Member registered successfully.")
 
-    elif choice == "9":
+    elif choice == "10":
         member_id = int(input("Enter member ID to view details: "))
         member_details = view_member_details(members, member_id)
         if member_details:
             print(member_details)
 
-    elif choice == "10":
+    elif choice == "11":
         print("Exiting the system. Goodbye!")
         break
 
